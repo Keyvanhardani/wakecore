@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local engine binary (not committed; downloaded by users separately)
+wakecore/_native/*.so
+wakecore/_native/*.dylib
+wakecore/_native/*.dll
+wakecore/_native/*.bin
+
+# Test outputs
+.pytest_cache/
+.tox/
+htmlcov/
+.coverage*
+
+# Local hotword cache
+hotwords/*.wake
+!hotwords/.gitkeep

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wakecore"
+version = "0.1.0"
+description = "Open hotword detection for private voice systems"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Keyvan Hardani" }]
+keywords = ["hotword", "wakeword", "voice", "speech", "audio"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+audio    = ["sounddevice>=0.4"]
+features = ["scipy>=1.11"]
+all      = ["sounddevice>=0.4", "scipy>=1.11"]
+dev      = ["pytest>=7", "ruff>=0.4"]
+
+[project.scripts]
+wakecore = "wakecore.cli:main"
+
+[project.urls]
+Homepage = "https://wakecore.dev"
+
+[tool.setuptools.packages.find]
+include = ["wakecore*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
