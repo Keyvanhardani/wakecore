@@ -1,0 +1,112 @@
+// WakeCore .NET SDK — P/Invoke wrapper over the native engine.
+
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+
+namespace WakeCore;
+
+public enum WakeStatus : int
+{
+    Ok            = 0,
+    Invalid       = 1,
+    Io            = 2,
+    NoMemory      = 3,
+    Internal      = 4,
+    Format        = 5,
+}
+
+public sealed class WakeException : Exception
+{
+    public WakeStatus Status { get; }
+    public WakeException(WakeStatus status, string? msg = null)
+        : base(msg ?? Native.WcStatusToString(status))
+    { Status = status; }
+}
+
+internal static class Native
+{
+    private const string LIB = "wakecore_engine";
+
+    [DllImport(LIB, EntryPoint = "wc_engine_open")]
+    public static extern WakeStatus Open(IntPtr body, int bodyLen, out IntPtr engine);
+
+    [DllImport(LIB, EntryPoint = "wc_engine_feed")]
+    public static extern WakeStatus Feed(IntPtr engine, IntPtr frame, out int detected);
+
+    [DllImport(LIB, EntryPoint = "wc_engine_close")]
+    public static extern void Close(IntPtr engine);
+
+    [DllImport(LIB, EntryPoint = "wc_engine_set_sensitivity")]
+    public static extern WakeStatus SetSensitivity(IntPtr engine, float sensitivity);
+
+    [DllImport(LIB, EntryPoint = "wc_sample_rate")]
+    public static extern int SampleRate();
+
+    [DllImport(LIB, EntryPoint = "wc_frame_length")]
+    public static extern int FrameLength();
+
+    [DllImport(LIB, EntryPoint = "wc_status_to_string")]
+    public static extern IntPtr StatusToStringPtr(WakeStatus status);
+
+    public static string WcStatusToString(WakeStatus s)
+        => Marshal.PtrToStringAnsi(StatusToStringPtr(s)) ?? s.ToString();
+}
+
+public sealed class Runtime : IDisposable
+{
+    private const int Magic = 0x454B4157;   /* "WAKE" little-endian */
+    private IntPtr _engine;
+
+    public int SampleRate     => Native.SampleRate();
+    public int FrameLength    => Native.FrameLength();
+    public int BytesPerFrame  => FrameLength * 2;
+
+    public static Runtime Load(string path)
+    {
+        var raw = File.ReadAllBytes(path);
+        if (raw.Length < 8 || BitConverter.ToInt32(raw, 0) != Magic)
+            throw new WakeException(WakeStatus.Format, "not a WakeCore container");
+        var body = raw[8..];
+        var rt = new Runtime();
+        unsafe
+        {
+            fixed (byte* ptr = body)
+            {
+                var st = Native.Open((IntPtr)ptr, body.Length, out rt._engine);
+                if (st != WakeStatus.Ok) throw new WakeException(st);
+            }
+        }
+        return rt;
+    }
+
+    public bool Process(ReadOnlySpan<short> frame)
+    {
+        if (frame.Length != FrameLength)
+            throw new ArgumentException($"frame must be {FrameLength} samples", nameof(frame));
+        int detected;
+        unsafe
+        {
+            fixed (short* ptr = frame)
+            {
+                var st = Native.Feed(_engine, (IntPtr)ptr, out detected);
+                if (st != WakeStatus.Ok) throw new WakeException(st);
+            }
+        }
+        return detected != 0;
+    }
+
+    public void SetSensitivity(float s)
+    {
+        var st = Native.SetSensitivity(_engine, s);
+        if (st != WakeStatus.Ok) throw new WakeException(st);
+    }
+
+    public void Dispose()
+    {
+        if (_engine != IntPtr.Zero) { Native.Close(_engine); _engine = IntPtr.Zero; }
+        GC.SuppressFinalize(this);
+    }
+
+    ~Runtime() => Dispose();
+}

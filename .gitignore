@@ -10,6 +10,31 @@ dist/
 .venv/
 venv/
 
+# Node
+node_modules/
+node/native/
+*.tgz
+.npm
+.npmrc
+
+# Rust
+target/
+Cargo.lock
+
+# .NET
+bin/
+obj/
+*.user
+
+# C/C++
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
 # IDE
 .vscode/
 .idea/
@@ -23,18 +48,16 @@ Thumbs.db
 # Logs
 *.log
 
-# Local engine binary (not committed; downloaded by users separately)
+# Local engine binary (downloaded separately)
 wakecore/_native/*.so
 wakecore/_native/*.dylib
 wakecore/_native/*.dll
-wakecore/_native/*.bin
+node/native/*.so
+node/native/*.dylib
+node/native/*.dll
 
 # Test outputs
 .pytest_cache/
 .tox/
 htmlcov/
 .coverage*
-
-# Local hotword cache
-hotwords/*.wake
-!hotwords/.gitkeep

@@ -1,0 +1,26 @@
+[package]
+name        = "wakecore"
+version     = "0.1.0"
+edition     = "2021"
+rust-version = "1.74"
+license     = "MIT"
+authors     = ["Keyvan Hardani"]
+description = "Open hotword detection for private voice systems."
+repository  = "https://github.com/Keyvanhardani/wakecore"
+homepage    = "https://wakecore.dev"
+keywords    = ["hotword", "wakeword", "audio", "voice"]
+categories  = ["multimedia::audio"]
+
+[lib]
+name = "wakecore"
+
+[features]
+default = ["native"]
+native  = []  /* enables the FFI bindings — requires the engine binary at link time */
+
+[dependencies]
+libc       = "0.2"
+thiserror  = "1.0"
+
+[dev-dependencies]
+tempfile = "3"
