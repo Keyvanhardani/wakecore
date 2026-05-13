@@ -84,7 +84,7 @@ def install_engine(*,
                 target_path.chmod(0o755)
             except OSError:
                 pass
-            print(f"done.")
+            print("done.")
             return 0
         except (urllib.error.URLError, urllib.error.HTTPError) as e:
             last_err = e

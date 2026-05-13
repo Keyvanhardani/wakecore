@@ -10,7 +10,6 @@ demos, and tests. They are deliberately small and depend only on numpy.
 """
 from __future__ import annotations
 import math
-from typing import Sequence
 
 import numpy as np
 
