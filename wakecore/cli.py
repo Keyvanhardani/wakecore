@@ -67,27 +67,16 @@ def _cmd_listen(args: argparse.Namespace) -> int:
 def _cmd_install_engine(args: argparse.Namespace) -> int:
     """Download + install the native engine binary for the current platform.
 
-    Required: a license token. Get one from https://wakecore.de.
+    The engine is publicly hosted at https://download.wakecore.de — no
+    license token needed for the engine itself; only the generator
+    service (https://api.wakecore.de) requires a paid plan.
     """
-    license_token = args.license or os.environ.get("WAKECORE_LICENSE")
-    if not license_token:
-        print(
-            "error: license token required.\n"
-            "  pass --license LIC-... or set WAKECORE_LICENSE\n"
-            "  get a token from https://wakecore.de",
-            file=sys.stderr,
-        )
-        return 2
-
-    try:
-        from .install import install_engine
-    except ImportError:
-        print("install support not yet implemented in this version.", file=sys.stderr)
-        return 2
-
-    return install_engine(license_token=license_token,
-                           target_dir=args.target_dir,
-                           force=args.force)
+    from .install import install_engine
+    return install_engine(
+        target_dir=args.target_dir,
+        force=args.force,
+        verify_sha256=not args.no_verify,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -110,12 +99,13 @@ def main(argv: list[str] | None = None) -> int:
     p_l.set_defaults(func=_cmd_listen)
 
     p_i = sub.add_parser("install-engine",
-                         help="install the native engine binary")
-    p_i.add_argument("--license", default=None, help="license token (or set WAKECORE_LICENSE)")
+                         help="download + install the native engine binary")
     p_i.add_argument("--target-dir", type=Path, default=None,
                      help="install path (default: ~/.wakecore/<version>/)")
     p_i.add_argument("--force", action="store_true",
                      help="overwrite an existing installation")
+    p_i.add_argument("--no-verify", action="store_true",
+                     help="skip SHA-256 verification of the download")
     p_i.set_defaults(func=_cmd_install_engine)
 
     args = parser.parse_args(argv)
