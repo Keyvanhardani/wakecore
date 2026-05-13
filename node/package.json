@@ -1,0 +1,37 @@
+{
+  "name": "wakecore",
+  "version": "0.1.0",
+  "description": "Open hotword detection for private voice systems",
+  "keywords": ["hotword", "wakeword", "voice", "speech", "audio", "ffi"],
+  "license": "MIT",
+  "author": "Keyvan Hardani",
+  "homepage": "https://wakecore.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Keyvanhardani/wakecore.git",
+    "directory": "node"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/",
+    "lint":  "echo 'no linter configured'",
+    "build": "echo 'pure-js — no build step'"
+  },
+  "optionalDependencies": {
+    "koffi": "^2.9.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,7 +1,15 @@
 """Bridge to the bundled inference engine.
 
 The native binary is distributed separately and is not part of this
-repository. See `INSTALL.md` for setup.
+repository. Install it via:
+
+    wakecore install-engine --license LIC-...
+
+The library is looked up in this order:
+
+  1. environment variable  `WAKECORE_NATIVE_DIR`
+  2. `~/.wakecore/<sdk_version>/`
+  3. directory next to this file (`./_native/`)
 """
 from __future__ import annotations
 import ctypes
@@ -22,22 +30,29 @@ _LIB_NAMES = {
 }
 
 
+def _candidate_dirs() -> list[Path]:
+    from .. import VERSION
+    candidates: list[Path] = []
+    env = os.environ.get("WAKECORE_NATIVE_DIR")
+    if env:
+        candidates.append(Path(env))
+    candidates.append(Path.home() / ".wakecore" / VERSION)
+    candidates.append(Path(__file__).resolve().parent)
+    return candidates
+
+
 def _resolve_lib_path() -> Path:
     name = _LIB_NAMES.get(sys.platform)
     if name is None:
         raise _RuntimeError(f"no native engine for {sys.platform!r}")
-
-    env = os.environ.get("WAKECORE_NATIVE_DIR")
-    candidates = []
-    if env:
-        candidates.append(Path(env) / name)
-    candidates.append(Path(__file__).resolve().parent / name)
-    for p in candidates:
+    for d in _candidate_dirs():
+        p = d / name
         if p.exists():
             return p
+    locations = "\n  ".join(str(d / name) for d in _candidate_dirs())
     raise _RuntimeError(
-        f"native engine not found. Set WAKECORE_NATIVE_DIR or place {name} "
-        f"next to wakecore/_native/. See INSTALL.md."
+        f"native engine not found. Looked in:\n  {locations}\n"
+        "Install with `wakecore install-engine --license ...`."
     )
 
 
@@ -57,7 +72,7 @@ class _NativeBindings:
         self.shut = self._bind("close", [POINTER(_CHandle)], None)
 
     def _bind(self, suffix, argtypes, restype):
-        for prefix in ("wakecore_", "wc_engine_", "wc_"):
+        for prefix in ("wc_engine_", "wakecore_", "wc_"):
             try:
                 fn = getattr(self._lib, prefix + suffix)
                 fn.argtypes = argtypes
@@ -82,7 +97,6 @@ class NativeBackend:
     def __init__(self, wake_file: WakeFile, options: dict):
         from ..runtime import SAMPLE_RATE, FRAME_LENGTH
         b = _get_bindings()
-
         body = wake_file.body
         body_arr = (c_uint8 * len(body))(*body)
         self._handle = POINTER(_CHandle)()
