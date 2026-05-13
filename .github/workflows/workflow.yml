@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Publish
 
 on:
   release:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build distribution
+  build-python:
+    name: Build Python distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,9 +29,9 @@ jobs:
           name: dist
           path: dist/
 
-  publish:
+  publish-pypi:
     name: Publish to PyPI
-    needs: build
+    needs: build-python
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -44,3 +44,25 @@ jobs:
           path: dist/
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      id-token: write
+      contents:  read
+    defaults:
+      run:
+        working-directory: node
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npm with OIDC provenance
+        run: npm publish --provenance --access public
