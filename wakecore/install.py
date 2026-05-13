@@ -24,7 +24,7 @@ DOWNLOAD_HOST = os.environ.get(
 
 # Mirrors tried in order if the primary fails.
 DOWNLOAD_MIRRORS: list[str] = [
-    "https://huggingface.co/Keyvanhardani/wakecore/resolve/main",
+    "https://huggingface.co/keyvan-ai/wakecore/resolve/main",
 ]
 
 

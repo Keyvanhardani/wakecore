@@ -129,7 +129,7 @@ files are produced by the WakeCore generator service.
 
 ## Links
 
-- GitHub:   <https://github.com/Keyvanhardani/wakecore>
+- GitHub:   <https://github.com/keyvan-ai/wakecore>
 - Website:  <https://wakecore.de>
 - Generator: <https://api.wakecore.de>
-- License:  [MIT](https://github.com/Keyvanhardani/wakecore/blob/main/LICENSE)
+- License:  [MIT](https://github.com/keyvan-ai/wakecore/blob/main/LICENSE)
