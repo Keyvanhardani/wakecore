@@ -22,8 +22,10 @@ DOWNLOAD_HOST = os.environ.get(
     "WAKECORE_DOWNLOAD_HOST", "https://download.wakecore.de"
 )
 
-# Fallback mirror (set when GitHub Releases is in place).
-DOWNLOAD_MIRROR: Optional[str] = None
+# Mirrors tried in order if the primary fails.
+DOWNLOAD_MIRRORS: list[str] = [
+    "https://huggingface.co/Keyvanhardani/wakecore/resolve/main",
+]
 
 
 _LIB_FILENAME = {
@@ -65,8 +67,8 @@ def install_engine(*,
 
     rel_path = f"/engine/{plat}/{arch}/{VERSION}/{lib_name}"
     candidates = [DOWNLOAD_HOST + rel_path]
-    if DOWNLOAD_MIRROR:
-        candidates.append(DOWNLOAD_MIRROR + rel_path)
+    for mirror in DOWNLOAD_MIRRORS:
+        candidates.append(mirror + rel_path)
 
     print(f"target:   {plat}/{arch}  (sdk v{VERSION})")
     print(f"install:  {target_path}")
