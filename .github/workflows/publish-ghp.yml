@@ -1,0 +1,37 @@
+name: Publish to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish-ghp:
+    name: Publish scoped package to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        working-directory: node
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@keyvanhardani"
+
+      - name: Re-scope package for GitHub Packages
+        run: |
+          npm pkg set name="@keyvanhardani/wakecore"
+          npm pkg set publishConfig.registry="https://npm.pkg.github.com"
+          cat package.json | python3 -m json.tool
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
